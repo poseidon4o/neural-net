@@ -108,7 +108,9 @@ int main() {
 
         XorNet & best = nets[sorted.back()];
 
-        if (sorted.back() < MAX_ERROR) {
+        if (grades[sorted.back()] < MAX_ERROR) {
+            cout << "Best error: " << grades[sorted.back()] << endl;
+
             test(best);
             return 0;
         }
