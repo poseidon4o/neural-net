@@ -9,8 +9,8 @@ using namespace std;
 
 typedef Net<7> XorNet;
 
-const int GRADE_REPETITIONS = 4;
-const double MAX_ERROR = 0.00001;
+const int GRADE_REPETITIONS = 10;
+const double MAX_ERROR = 0.01;
 
 static const vector<vector<int>> input = {
     { -1, -1, -1 },
@@ -120,14 +120,22 @@ int main() {
             return nets[randMax(nets.size() - 1)];
         };
 
+        // cross the lower half with low chance of mutation
         for (int c = 0; c < grades.size() / 2; ++c) {
             auto idx = sorted[c];
 
             nets[idx] = cross(best, randNet());
-            if (chance(0.05)) {
+            if (chance(0.1)) {
                 mutate(nets[idx], 0.5);
             }
         }
+
+        // mutate 20% of the middle
+        for (int c = 0; c < grades.size() / 5; ++c) {
+            mutate(nets[idx + grades.size() / 2], 0.5);
+        }
+
     }
 
+    return 0;
 }
