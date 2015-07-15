@@ -95,16 +95,17 @@ int main() {
     while (1) {
         auto grades = grade(nets);
         vector<int> sorted(grades.size());
-        int c = 0;
-        for (auto & i : sorted) { i = c++; }
+        int idx = 0;
+        for (auto & i : sorted) { i = idx++; }
 
         sort(sorted.begin(), sorted.end(), [&grades] (int left, int right) {
             return grades[left] > grades[right];
         });
 
-        for (int c = 0; c < grades.size(); ++c) {
-            cout << grades[sorted[c]] <<  endl;
-        }
+        // uncomment for every stage report
+        // for (int c = 0; c < grades.size(); ++c) {
+        //     cout << grades[sorted[c]] <<  endl;
+        // }
 
         XorNet & best = nets[sorted.back()];
 
