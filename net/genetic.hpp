@@ -58,7 +58,11 @@ namespace neuron
         for (int c = 0; c < SIZE; ++c) {
             for (int r = 0; r < SIZE; ++r) {
                 if (subject.hasSynapse(c, r) && chance(rate)) {
-                    subject[c][r] += rand() - .5;
+                    if (chance(0.5)) {
+                        subject[c][r] += rand() - .5;
+                    } else {
+                        subject[c][r] = randMax(2) - 1.;
+                    }
                 }
             }
         }
