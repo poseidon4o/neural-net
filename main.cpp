@@ -95,17 +95,6 @@ int main() {
     while (1) {
         auto grades = grade(nets);
         vector<int> sorted(grades.size());
-        int idx = 0;
-        for (auto & i : sorted) { i = idx++; }
-
-        sort(sorted.begin(), sorted.end(), [&grades] (int left, int right) {
-            return grades[left] > grades[right];
-        });
-
-        // uncomment for every stage report
-        // for (int c = 0; c < grades.size(); ++c) {
-        //     cout << grades[sorted[c]] <<  endl;
-        // }
 
         XorNet & best = nets[sorted.back()];
 
@@ -116,26 +105,12 @@ int main() {
             return 0;
         }
 
-
-        auto randNet = [&nets]() -> XorNet & {
-            return nets[randMax(nets.size() - 1)];
-        };
-
-        // cross the lower half with low chance of mutation
-        for (int c = 0; c < grades.size() / 2; ++c) {
-            auto idx = sorted[c];
-
-            nets[idx] = cross(best, randNet());
-            if (chance(0.1)) {
-                mutate(nets[idx], 0.5);
-            }
+        std::vector<pair<XorNet*, double>> data(nets.size());
+        for (int c = 0; c < nets.size(); ++c) {
+            data[c] = make_pair(&nets[c], grades[c]);
         }
 
-        // mutate 20% of the middle
-        for (int c = 0; c < grades.size() / 5; ++c) {
-            mutate(nets[idx + grades.size() / 2], 0.5);
-        }
-
+        mutationStep(data);
     }
 
     return 0;

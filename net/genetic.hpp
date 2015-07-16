@@ -67,6 +67,36 @@ namespace neuron
             }
         }
     }
+
+
+    template <uint32_t SIZE>
+    void mutationStep(std::vector<std::pair<Net<SIZE>*, double>> & grades) {
+        sort(grades.begin(), grades.end(),
+            [](const std::pair<Net<SIZE>*, double> & left, const std::pair<Net<SIZE>*, double> & right) {
+                return left.second > right.second;
+            });
+
+        auto randNet = [&grades]() -> Net<SIZE> & {
+            return *grades[randMax(grades.size() - 1)].first;
+        };
+
+        const Net<SIZE> & best = *grades.front().first;
+
+
+        // cross the lower half with low chance of mutation
+        for (int c = 0; c < grades.size() / 2; ++c) {
+            *grades[c].first = cross(best, randNet());
+
+            if (chance(0.1)) {
+                mutate(*grades[c].first, 0.5);
+            }
+        }
+
+        // mutate 20% of the middle
+        for (int c = 0; c < grades.size() / 5; ++c) {
+            mutate(*grades[c + grades.size() / 2].first, 0.5);
+        }
+    }
 }
 
 
