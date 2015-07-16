@@ -34,6 +34,7 @@ namespace neuron
         }
     }
 
+    // this will corss two Nets assuming they have the same topology!
     template <uint32_t SIZE>
     Net<SIZE> cross(const Net<SIZE> & mother, const Net<SIZE> & father) {
         const Net<SIZE> * parents[2] = {&mother, &father};
@@ -87,8 +88,8 @@ namespace neuron
         for (int c = 0; c < grades.size() / 2; ++c) {
             *grades[c].first = cross(best, randNet());
 
-            if (chance(0.1)) {
-                mutate(*grades[c].first, 0.5);
+            if (chance(0.05)) {
+                mutate(*grades[c].first, 0.33);
             }
         }
 
