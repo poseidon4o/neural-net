@@ -32,8 +32,8 @@ void test(XorNet & net) {
 }
 
 
-vector<double> grade(vector<XorNet> & nets) {
-    vector<double> results;
+vector<pair<XorNet*, double>> grade(vector<XorNet> & nets) {
+    vector<pair<XorNet*, double>> results;
 
     auto nextIt = [](decltype(input.begin()) & iter) {
         if (++iter == input.end()) {
@@ -58,7 +58,7 @@ vector<double> grade(vector<XorNet> & nets) {
             deviation += fabs((data[2] + 1.) - (net.value(6) + 1.));
         }
 
-        results.push_back(deviation / maxDeviation);
+        results.push_back(make_pair(&net, deviation / maxDeviation));
     }
 
     return results;
@@ -94,23 +94,20 @@ int main() {
 
     while (1) {
         auto grades = grade(nets);
-        vector<int> sorted(grades.size());
 
-        XorNet & best = nets[sorted.back()];
+        auto best = max_element(grades.begin(), grades.end(),
+            [](const pair<XorNet*, double> & l, const pair<XorNet*, double> & r) {
+                return l.second > r.second;
+            });
 
-        if (grades[sorted.back()] < MAX_ERROR) {
-            cout << "Best error: " << grades[sorted.back()] << endl;
+        if (best->second < MAX_ERROR) {
+            cout << "Best error: " << best->second << endl;
 
-            test(best);
+            test(*best->first);
             return 0;
         }
 
-        std::vector<pair<XorNet*, double>> data(nets.size());
-        for (int c = 0; c < nets.size(); ++c) {
-            data[c] = make_pair(&nets[c], grades[c]);
-        }
-
-        mutationStep(data);
+        mutationStep(grades);
     }
 
     return 0;
