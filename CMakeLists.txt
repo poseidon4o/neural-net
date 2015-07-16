@@ -3,5 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 project(nn)
 ADD_DEFINITIONS(-std=c++11)
 
+include_directories(net)
+file(GLOB SOURCES "*.cpp" "problems/*.cpp")
+file(GLOB HEADERS "net/*.hpp")
 
-add_executable(${PROJECT_NAME} main.cpp)
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

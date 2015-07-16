@@ -26,6 +26,8 @@ namespace neuron
     template <uint32_t SIZE>
     class Net {
     public:
+        enum uint32_t { NeuronCount = SIZE };
+
 
         Net(): m_Neurons{{0, 0},} {
             for (auto & row : m_SynapseMap) {
