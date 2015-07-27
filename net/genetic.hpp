@@ -20,7 +20,7 @@ namespace neuron
     }
 
     bool chance(double percent) {
-        return percent < rand();
+        return percent > rand();
     }
 
     template <uint32_t SIZE>
