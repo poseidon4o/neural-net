@@ -8,6 +8,7 @@
 #include <functional>
 #include <cmath>
 #include <cassert>
+#include <ios>
 
 #include <stdint.h>
 
@@ -29,7 +30,8 @@ namespace neuron
         enum uint32_t { NeuronCount = SIZE };
 
 
-        Net(): m_Neurons{{0, 0},} {
+        Net() {
+            std::fill(m_Neurons.begin(), m_Neurons.end(), Neuron{0, 0});
             for (auto & row : m_SynapseMap) {
                 for (auto & cell : row) {
                     cell = INVALID_SYNAPSE;
@@ -114,6 +116,18 @@ namespace neuron
         // m_SynapseMap[x][y] is the edge value from x to y or INVALID_SYNAPSE
         std::array<std::array<double, SIZE>, SIZE> m_SynapseMap;
     };
+
+    template <uint32_t SIZE>
+    std::ostream & operator<<(std::ostream & os, Net<SIZE> & net) {
+        for (int c = 0; c < SIZE; ++c) {
+            for (int r = 0; r < SIZE; ++r) {
+                if (net.hasSynapse(c, r)) {
+                    os << c << ' ' << r << ' ' << net[c][r] << std::endl;
+                }
+            }
+        }
+        return os;
+    }
 
 }
 
