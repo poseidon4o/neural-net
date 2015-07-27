@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cassert>
 #include <ios>
+#include <iomanip>
 
 #include <stdint.h>
 
@@ -122,7 +123,7 @@ namespace neuron
         for (int c = 0; c < SIZE; ++c) {
             for (int r = 0; r < SIZE; ++r) {
                 if (net.hasSynapse(c, r)) {
-                    os << c << ' ' << r << ' ' << net[c][r] << std::endl;
+                    os << c << '(' << net.value(c) << ")\t" << r << '(' << net.value(r) << ")\t" << net[c][r] << std::endl;
                 }
             }
         }
