@@ -18,7 +18,7 @@ public:
     using pair = std::pair<A, B>;
 
 
-
+	int runs;
     typedef neuron::Net<7> XorNet;
 
     XorTest(): input({
@@ -26,7 +26,7 @@ public:
         { -1,  1,  1 },
         {  1, -1,  1 },
         {  1,  1, -1 }
-    }) {
+    }), runs(0) {
         // input 0 - to hidden
         base[0][2] = 0;
         base[0][3] = 0;
@@ -44,20 +44,30 @@ public:
         base[3][6] = 0;
         base[4][6] = 0;
         base[5][6] = 0;
+
+		base.topSort();
     }
 
     XorNet & run() {
-        vector<XorNet> nets(10, base);
+        vector<XorNet> nets(200, base);
         for_each(nets.begin(), nets.end(), neuron::random<XorNet::NeuronCount>);
 
-        double error = 1;
+        double last_err = 1;
         while (true) {
+			++runs;
             auto grades = grade(nets);
 
             auto best = max_element(grades.begin(), grades.end(),
                 [](const pair<XorNet*, double> & l, const pair<XorNet*, double> & r) {
                     return l.second > r.second;
                 });
+
+			//if (last_err != best->second) {
+			//	std::cout << last_err << "\n";
+			//	test(*best->first);
+
+			//	last_err = best->second;
+			//}
 
             if(best->second < MAX_ERROR) {
                 return this->best = *best->first;
@@ -68,7 +78,7 @@ public:
     }
 
     void test(XorNet & net) {
-        for (int c = 0; c < input.size(); ++c) {
+		for (int c = 0; c < input.size(); ++c) {
             net.stimulate(0, input[c][0]);
             net.stimulate(1, input[c][1]);
 
@@ -79,7 +89,7 @@ public:
         }
     }
 
-private:
+
     vector<pair<XorNet*, double>> grade(vector<XorNet> & nets) {
         vector<pair<XorNet*, double>> results;
 
@@ -115,8 +125,9 @@ private:
 private:
     const vector<vector<int>> input;
 
-    const int GRADE_REPETITIONS = 10;
-    const double MAX_ERROR = 0.01;
+    const int GRADE_REPETITIONS = 1;
+    const double MAX_ERROR = 0.0000001;
+
 
     XorNet base, best;
 };

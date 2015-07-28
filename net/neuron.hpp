@@ -2,6 +2,8 @@
 #define _NEURON_H_INCLUDED_
 
 #include <vector>
+#include <list>
+#include <unordered_set>
 #include <utility>
 #include <array>
 #include <limits>
@@ -90,25 +92,83 @@ namespace neuron
             return m_Neurons[idx].m_FireValue;
         }
 
+		void topSort() {
+			auto gcpy = m_SynapseMap;
+
+			auto hasEdge = [&gcpy](int from, int to) {
+				return gcpy[from][to] != INVALID_SYNAPSE;
+			};
+
+			auto removeEdge = [&gcpy](int from, int to) {
+				gcpy[from][to] = INVALID_SYNAPSE;
+			};
+
+			std::vector<int> sortedIdxs;
+			std::unordered_set<int> pureChildren;
+			for (int c = 0; c < SIZE; ++c) {
+				bool cHasParents = false;
+				for (int r = 0; r < SIZE; ++r) {
+					if (hasEdge(r, c)) {
+						cHasParents = true;
+						break;
+					}
+				}
+				if (!cHasParents) {
+					pureChildren.insert(c);
+				}
+			}
+			while (pureChildren.size()) {
+				int childIdx = *pureChildren.begin();
+				pureChildren.erase(pureChildren.begin());
+
+				sortedIdxs.push_back(childIdx);
+				for (int c = 0; c < SIZE; ++c) {
+					if (c == childIdx || sortedIdxs.end() != std::find(sortedIdxs.begin(), sortedIdxs.end(), c)) {
+						continue;
+					}
+
+					removeEdge(childIdx, c);
+
+					bool cHasMoreParents = false;
+					for (int r = 0; r < SIZE; ++r) {
+						if (hasEdge(r, c)) {
+							cHasMoreParents = true;
+							break;
+						}
+					}
+					if (!cHasMoreParents) {
+						pureChildren.insert(c);
+					}
+				}
+			}
+
+			for (int c = 0; c < SIZE; ++c) {
+				for (int r = 0; r < SIZE; ++r) {
+					assert(!hasEdge(c, r) && "Cyclic graph!");
+				}
+			}
+			std::copy(sortedIdxs.begin(), sortedIdxs.end(), m_DAG.begin());
+		}
+
         bool hasSynapse(int from, int to) const {
             return m_SynapseMap[from][to] != INVALID_SYNAPSE;
         }
 
         void step() {
-            for(int c = 0; c < SIZE; ++c) {
-                for(int r = 0; r < SIZE; ++r) {
-                    if (m_SynapseMap[c][r] == INVALID_SYNAPSE) {
-                        continue;
-                    }
+			for (int dag = 0; dag < SIZE; ++dag) {
+				int idx = m_DAG[dag];
+				auto & nrn = m_Neurons[idx];
+				for (int from = 0; from < SIZE; ++from) {
+					if (hasSynapse(from, idx)) {
+						nrn.m_NextFireValue += m_Neurons[from].m_FireValue * m_SynapseMap[from][idx];
+					}
+				}
+			}
 
-                    m_Neurons[r].m_NextFireValue += m_SynapseMap[c][r] * m_Neurons[c].m_FireValue;
-                }
-            }
-
-            for (auto & nrn : m_Neurons) {
-                nrn.m_FireValue = 2.0 * (sigmoid(nrn.m_NextFireValue) - 0.5);
-                nrn.m_NextFireValue = 0.0;
-            }
+			for (auto & nrn : m_Neurons) {
+				nrn.m_FireValue = 2.0 * (sigmoid(nrn.m_NextFireValue) - 0.5);
+				nrn.m_NextFireValue = 0.0;
+			}
         }
 
     private:
@@ -116,6 +176,7 @@ namespace neuron
 
         // m_SynapseMap[x][y] is the edge value from x to y or INVALID_SYNAPSE
         std::array<std::array<double, SIZE>, SIZE> m_SynapseMap;
+		std::array<int, SIZE> m_DAG;
     };
 
     template <uint32_t SIZE>
